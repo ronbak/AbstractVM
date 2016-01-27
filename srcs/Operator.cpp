@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 18:12:02 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 19:11:47 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 20:15:55 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,13 +17,68 @@
 #include <cmath>
 #include <string>
 
-#define O_ADD(A, B)		(A + B)
-#define O_SUB(A, B)		(A - B)
-#define O_MUL(A, B)		(A * B)
-#define O_DIV(A, B)		(A / B)
-#define O_MOD(A, B)		(A % B)
+template<typename T>
+static T			op_add(T a, T b)
+{
+	int64_t		res = ((int64_t)a) + ((int64_t)b);
 
-#define DEF_OP(T, T_NAME, PARSE, OP, OP_NAME)		\
+	if (res < std::numeric_limits<T>::min()
+		|| res > std::numeric_limits<T>::max())
+		throw std::runtime_error("Overflow");
+	return ((T)res);
+}
+
+template<typename T>
+static T			op_sub(T a, T b)
+{
+	int64_t		res = ((int64_t)a) - ((int64_t)b);
+
+	if (res < std::numeric_limits<T>::min()
+		|| res > std::numeric_limits<T>::max())
+		throw std::runtime_error("Overflow");
+	return ((T)res);
+}
+
+template<typename T>
+static T			op_mul(T a, T b)
+{
+	int64_t		res = ((int64_t)a) * ((int64_t)b);
+
+	if (res < std::numeric_limits<T>::min()
+		|| res > std::numeric_limits<T>::max())
+		throw std::runtime_error("Overflow");
+	return ((T)res);
+}
+
+template<typename T>
+static T			op_div(T a, T b)
+{
+	if (b == 0)
+		throw std::runtime_error("Division by 0");
+	return (a / b);
+}
+
+template<typename T>
+static T			op_mod(T a, T b)
+{
+	if (b == 0)
+		throw std::runtime_error("Division by 0");
+	return (a % b);
+}
+
+template<>
+float				op_mod(float a, float b)
+{
+	return (std::fmod(a, b));
+}
+
+template<>
+double				op_mod(double a, double b)
+{
+	return (std::fmod(a, b));
+}
+
+#define DEF_OP(T, T_NAME, PARSE, OP_NAME, OP)		\
 static IOperand const	*op_##T_NAME##OP_NAME(std::string const &a, std::string const &b)		\
 {																								\
 	T const		value = OP(((T)PARSE(a)), ((T)PARSE(b)));										\
@@ -31,18 +86,18 @@ static IOperand const	*op_##T_NAME##OP_NAME(std::string const &a, std::string co
 	return (OperandFactory::instance.createOperand(IOperand::T_NAME, std::to_string(value)));	\
 }
 
-#define DEF_OP_ALL(T, T_NAME, PARSE, O_ADD, O_SUB, O_MUL, O_DIV, O_MOD)	\
-	DEF_OP(T, T_NAME, PARSE, O_ADD, OP_ADD);	\
-	DEF_OP(T, T_NAME, PARSE, O_SUB, OP_SUB);	\
-	DEF_OP(T, T_NAME, PARSE, O_MUL, OP_MUL);	\
-	DEF_OP(T, T_NAME, PARSE, O_DIV, OP_DIV);	\
-	DEF_OP(T, T_NAME, PARSE, O_MOD, OP_MOD);
+#define DEF_OP_ALL(T, T_NAME, PARSE)	\
+	DEF_OP(T, T_NAME, PARSE, OP_ADD, op_add);	\
+	DEF_OP(T, T_NAME, PARSE, OP_SUB, op_sub);	\
+	DEF_OP(T, T_NAME, PARSE, OP_MUL, op_mul);	\
+	DEF_OP(T, T_NAME, PARSE, OP_DIV, op_div);	\
+	DEF_OP(T, T_NAME, PARSE, OP_MOD, op_mod);
 
-DEF_OP_ALL(int8_t, INT8, std::stoi, O_ADD, O_SUB, O_MUL, O_DIV, O_MOD);
-DEF_OP_ALL(int16_t, INT16, std::stoi, O_ADD, O_SUB, O_MUL, O_DIV, O_MOD);
-DEF_OP_ALL(int32_t, INT32, std::stol, O_ADD, O_SUB, O_MUL, O_DIV, O_MOD);
-DEF_OP_ALL(float, FLOAT, std::stof, O_ADD, O_SUB, O_MUL, O_DIV, std::fmod);
-DEF_OP_ALL(double, DOUBLE, std::stod, O_ADD, O_SUB, O_MUL, O_DIV, std::fmod);
+DEF_OP_ALL(int8_t, INT8, std::stoi);
+DEF_OP_ALL(int16_t, INT16, std::stoi);
+DEF_OP_ALL(int32_t, INT32, std::stol);
+DEF_OP_ALL(float, FLOAT, std::stof);
+DEF_OP_ALL(double, DOUBLE, std::stod);
 
 #define OP_GET(PRECI, OP)	((PRECI) * IOperand::OPERAND_COUNT + (OP))
 #define OP_SET(T, OP)		[OP_GET(IOperand::T, OP)] = &op_##T##OP

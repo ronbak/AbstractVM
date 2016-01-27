@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:43:13 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 19:00:13 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 19:27:33 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -88,7 +88,6 @@ IOperand const			*Operand<T>::operator%(IOperand const &rhs) const
 {
 	return (Operator::call_op(*this, rhs, Operator::OP_MOD));
 }
-
 
 template<typename T>
 std::string const		&Operand<T>::toString(void) const
