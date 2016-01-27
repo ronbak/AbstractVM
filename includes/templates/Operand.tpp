@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:43:13 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 16:26:42 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 19:00:13 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -51,45 +51,44 @@ OPERAND_TYPE(int32_t, INT32);
 OPERAND_TYPE(float, FLOAT);
 OPERAND_TYPE(double, DOUBLE);
 
+#undef OPERAND_TYPE
+
 /*
 ** ========================================================================== **
 ** Operators
 */
 
+
 template<typename T>
 IOperand const			*Operand<T>::operator+(IOperand const &rhs) const
 {
-	return (this);
-	(void)rhs;
+	return (Operator::call_op(*this, rhs, Operator::OP_ADD));
 }
 
 template<typename T>
 IOperand const			*Operand<T>::operator-(IOperand const &rhs) const
 {
-	return (this);
-	(void)rhs;
+	return (Operator::call_op(*this, rhs, Operator::OP_SUB));
 }
 
 template<typename T>
 IOperand const			*Operand<T>::operator*(IOperand const &rhs) const
 {
-	return (this);
-	(void)rhs;
+	return (Operator::call_op(*this, rhs, Operator::OP_MUL));
 }
 
 template<typename T>
 IOperand const			*Operand<T>::operator/(IOperand const &rhs) const
 {
-	return (this);
-	(void)rhs;
+	return (Operator::call_op(*this, rhs, Operator::OP_DIV));
 }
 
 template<typename T>
 IOperand const			*Operand<T>::operator%(IOperand const &rhs) const
 {
-	return (this);
-	(void)rhs;
+	return (Operator::call_op(*this, rhs, Operator::OP_MOD));
 }
+
 
 template<typename T>
 std::string const		&Operand<T>::toString(void) const

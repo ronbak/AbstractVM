@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:06:10 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 16:18:22 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 16:53:04 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,6 +27,8 @@ OperandFactory::OperandFactory(void)
 OperandFactory::~OperandFactory(void)
 {
 }
+
+OperandFactory			OperandFactory::instance = {};
 
 IOperand const			*OperandFactory::createOperand(IOperand::EOperandType type, std::string const &value) const
 {

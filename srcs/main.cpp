@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:59:15 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 16:27:38 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 19:13:44 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -17,10 +17,15 @@
 
 int				main(void)
 {
-	OperandFactory	factory;
 	IOperand const	*a;
+	IOperand const	*b;
+	IOperand const	*c;
 
-	a = factory.createOperand(IOperand::FLOAT, "0");
-	std::cout << a->getType() << ": " << a->toString() << std::endl;
+	a = OperandFactory::instance.createOperand(IOperand::INT8, "8");
+	b = OperandFactory::instance.createOperand(IOperand::FLOAT, "4");
+	c = *a * *b;
+	delete a;
+	delete b;
+	std::cout << c->getType() << ": " << c->toString() << std::endl;
 	return (0);
 }

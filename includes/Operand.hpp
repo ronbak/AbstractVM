@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:10:54 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 16:10:44 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 18:57:42 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,11 +14,15 @@
 # define INT_OPERAND_HPP
 
 # include "IOperand.hpp"
+# include "Operator.hpp"
 
 # include <exception>
 # include <stdint.h>
 # include <string>
 
+/*
+** IOperand implementation
+*/
 template<typename T>
 class	Operand : public IOperand
 {
@@ -40,7 +44,6 @@ public:
 protected:
 
 	std::string					_strValue;
-	T							_value;
 
 private:
 	Operand(void) = delete;
