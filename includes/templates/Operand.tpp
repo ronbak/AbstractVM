@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:43:13 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 19:27:33 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 22:46:45 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -35,7 +35,7 @@ int								Operand<T>::getPrecision(void) const
 template<typename T>
 IOperand::EOperandType			Operand<T>::getType(void) const
 {
-	throw std::domain_error("Invalid operand type");
+	throw std::runtime_error("Invalid operand type");
 }
 
 #define OPERAND_TYPE(T, OP)		\

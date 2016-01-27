@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 18:12:02 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 20:15:55 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 23:55:26 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,43 +14,50 @@
 #include "OperandFactory.hpp"
 #include "Operator.hpp"
 
+#include <cfenv>
 #include <cmath>
+#include <limits>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
+
+// #pragma STDC FENV_ACCESS ON
+
+#define TMPL_IF(IF)		typename std::enable_if<IF>::type* = nullptr
+
+/*
+** ========================================================================== **
+** Integer operations
+*/
 
 template<typename T>
+static T			integer_overflow(int64_t n)
+{
+	if (n < std::numeric_limits<T>::min()
+		|| n > std::numeric_limits<T>::max())
+		throw std::runtime_error("Overflow");
+	return ((T)n);
+}
+
+template<typename T, TMPL_IF(std::is_integral<T>::value)>
 static T			op_add(T a, T b)
 {
-	int64_t		res = ((int64_t)a) + ((int64_t)b);
-
-	if (res < std::numeric_limits<T>::min()
-		|| res > std::numeric_limits<T>::max())
-		throw std::runtime_error("Overflow");
-	return ((T)res);
+	return (integer_overflow<T>((int64_t)a) + ((int64_t)b));
 }
 
-template<typename T>
+template<typename T, TMPL_IF(std::is_integral<T>::value)>
 static T			op_sub(T a, T b)
 {
-	int64_t		res = ((int64_t)a) - ((int64_t)b);
-
-	if (res < std::numeric_limits<T>::min()
-		|| res > std::numeric_limits<T>::max())
-		throw std::runtime_error("Overflow");
-	return ((T)res);
+	return (integer_overflow<T>((int64_t)a) - ((int64_t)b));
 }
 
-template<typename T>
+template<typename T, TMPL_IF(std::is_integral<T>::value)>
 static T			op_mul(T a, T b)
 {
-	int64_t		res = ((int64_t)a) * ((int64_t)b);
-
-	if (res < std::numeric_limits<T>::min()
-		|| res > std::numeric_limits<T>::max())
-		throw std::runtime_error("Overflow");
-	return ((T)res);
+	return (integer_overflow<T>((int64_t)a) * ((int64_t)b));
 }
 
-template<typename T>
+template<typename T, TMPL_IF(std::is_integral<T>::value)>
 static T			op_div(T a, T b)
 {
 	if (b == 0)
@@ -58,7 +65,7 @@ static T			op_div(T a, T b)
 	return (a / b);
 }
 
-template<typename T>
+template<typename T, TMPL_IF(std::is_integral<T>::value)>
 static T			op_mod(T a, T b)
 {
 	if (b == 0)
@@ -66,17 +73,71 @@ static T			op_mod(T a, T b)
 	return (a % b);
 }
 
-template<>
-float				op_mod(float a, float b)
+/*
+** ========================================================================== **
+** Floating point operations
+*/
+
+template<typename T>
+static T			float_exception(T n)
 {
-	return (std::fmod(a, b));
+	int const			except = fetestexcept(FE_ALL_EXCEPT);
+
+	if (except != 0)
+	{
+		if (except & FE_DIVBYZERO)
+			throw std::runtime_error("Division by 0");
+		// if (except & FE_INEXACT)
+		// 	throw std::runtime_error("Inexact");
+		if (except & FE_INVALID)
+			throw std::runtime_error("Invalid");
+		if (except & FE_OVERFLOW)
+			throw std::runtime_error("Overflow");
+		if (except & FE_UNDERFLOW)
+			throw std::runtime_error("Underflow");
+	}
+	return (n);
 }
 
-template<>
-double				op_mod(double a, double b)
+template<typename T, TMPL_IF(std::is_floating_point<T>::value)>
+static T			op_add(T a, T b)
 {
-	return (std::fmod(a, b));
+	feclearexcept(FE_ALL_EXCEPT);
+	return (float_exception(a + b));
 }
+
+template<typename T, TMPL_IF(std::is_floating_point<T>::value)>
+static T			op_sub(T a, T b)
+{
+	feclearexcept(FE_ALL_EXCEPT);
+	return (float_exception(a - b));
+}
+
+template<typename T, TMPL_IF(std::is_floating_point<T>::value)>
+static T			op_mul(T a, T b)
+{
+	feclearexcept(FE_ALL_EXCEPT);
+	return (float_exception(a * b));
+}
+
+template<typename T, TMPL_IF(std::is_floating_point<T>::value)>
+static T			op_div(T a, T b)
+{
+	feclearexcept(FE_ALL_EXCEPT);
+	return (float_exception(a / b));
+}
+
+template<typename T, TMPL_IF(std::is_floating_point<T>::value)>
+static T			op_mod(T a, T b)
+{
+	feclearexcept(FE_ALL_EXCEPT);
+	return (float_exception(std::fmod(a, b)));
+}
+
+/*
+** ========================================================================== **
+** call_op
+*/
 
 #define DEF_OP(T, T_NAME, PARSE, OP_NAME, OP)		\
 static IOperand const	*op_##T_NAME##OP_NAME(std::string const &a, std::string const &b)		\

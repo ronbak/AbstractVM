@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:10:54 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 18:57:42 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/27 22:47:23 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,7 +16,7 @@
 # include "IOperand.hpp"
 # include "Operator.hpp"
 
-# include <exception>
+# include <stdexcept>
 # include <stdint.h>
 # include <string>
 
