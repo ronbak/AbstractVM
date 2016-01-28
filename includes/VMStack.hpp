@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:27:18 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/28 14:34:17 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/28 18:51:05 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -22,6 +22,7 @@
 ** VMStack
 ** -
 ** Available operations:
+**  input		Read from stdin (Take an argument: the default value/type)
 **  push		Push a value on the stack (Take an argument)
 **  pop			Pop the top of the stack
 **  dump		Dump all the stack
@@ -34,7 +35,7 @@
 **  mod			Modulo, same behavior as add
 **  print		Print the top value
 **  exit		End
-** TODO: rotate, read input
+** TODO: rotate
 ** TODO: if>, if<, if==, if>=, if<=, if!=, else, endif
 */
 
@@ -56,6 +57,7 @@ protected:
 	IOperand const	*_get_last(void);
 	IOperand const	*_extract_last(void);
 
+	void			_instr_input(std::string const *param);
 	void			_instr_push(std::string const *param);
 	void			_instr_pop(std::string const *param);
 	void			_instr_dump(std::string const *param);

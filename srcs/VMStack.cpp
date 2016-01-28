@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/28 18:10:57 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/28 18:53:27 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -42,6 +42,7 @@ void			VMStack::exec(std::string const &instr, std::string const *param)
 }
 
 std::unordered_map<std::string, std::pair<VMStack::instr_t, bool>> const	VMStack::_instructions{
+	{"input", {&VMStack::_instr_input, true}},
 	{"push", {&VMStack::_instr_push, true}},
 	{"pop", {&VMStack::_instr_pop, false}},
 	{"dump", {&VMStack::_instr_dump, false}},
@@ -72,6 +73,31 @@ IOperand const	*VMStack::_extract_last(void)
 
 	_stack.pop_back();
 	return (last);
+}
+
+void			VMStack::_instr_input(std::string const *param)
+{
+	static std::string		types[IOperand::OPERAND_COUNT] = {
+		[IOperand::INT8] = "int8",
+		[IOperand::INT16] = "int16",
+		[IOperand::INT32] = "int32",
+		[IOperand::FLOAT] = "float",
+		[IOperand::DOUBLE] = "double",
+	};
+	IOperand const *const	def = OperandFactory::instance.parseOperand(*param);
+	std::string				input;
+
+	std::cout << ">> INPUT" << std::endl << types[def->getType()] << "("
+		<< def->toString() << "): " << std::flush;
+	std::getline(std::cin, input);
+	std::cin.clear();
+	if (input.size() == 0)
+		_stack.push_back(def);
+	else
+	{
+		_stack.push_back(OperandFactory::instance.createOperand(def->getType(), input));
+		delete def;
+	}
 }
 
 void			VMStack::_instr_push(std::string const *param)
