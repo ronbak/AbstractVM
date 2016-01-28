@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:00:57 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 18:54:44 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/28 14:34:14 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,7 +14,10 @@
 # define OPERANDFACTORY_HPP
 
 # include "IOperand.hpp"
+
+# include <regex>
 # include <string>
+# include <unordered_map>
 
 /*
 ** Operand factory
@@ -23,6 +26,8 @@ class	OperandFactory
 {
 public:
 	virtual ~OperandFactory(void);
+
+	IOperand const			*parseOperand(std::string const &value) const;
 
 	IOperand const			*createOperand(IOperand::EOperandType type, std::string const &value) const;
 
@@ -33,6 +38,9 @@ protected:
 	OperandFactory(void);
 
 	IOperand const			*(OperandFactory::*_operandCreators[IOperand::OPERAND_COUNT])(std::string const &value) const;
+
+	std::regex												_opRegex;
+	std::unordered_map<std::string, IOperand::EOperandType>	_opTypes;
 
 private:
 

@@ -6,26 +6,34 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:59:15 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 23:55:18 by juloo            ###   ########.fr       //
+//   Updated: 2016/01/28 14:05:28 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "Operand.hpp"
 #include "OperandFactory.hpp"
+#include "VMStack.hpp"
 
 #include <iostream>
+#include <vector>
 
 int				main(void)
 {
-	IOperand const	*a;
-	IOperand const	*b;
-	IOperand const	*c;
+	std::vector<IOperand const*>	stack;
+	VMStack							vm;
 
-	a = OperandFactory::instance.createOperand(IOperand::FLOAT, "1");
-	b = OperandFactory::instance.createOperand(IOperand::FLOAT, "1.65465416541654614");
-	c = *a / *b;
-	delete a;
-	delete b;
-	std::cout << c->getType() << ": " << c->toString() << std::endl;
+	try
+	{
+		vm.exec("push", new std::string("int8(4)"));
+		vm.exec("push", new std::string("int8(8)"));
+		vm.exec("dump");
+		vm.exec("add");
+		vm.exec("print");
+		vm.exec("assert", new std::string("int16(12)"));
+	}
+	catch (std::exception const &e)
+	{
+		std::cout << "Error: " << e.what() << std::endl;
+	}
 	return (0);
 }

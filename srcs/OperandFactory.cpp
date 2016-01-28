@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:06:10 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 16:53:04 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/28 14:05:05 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -20,6 +20,14 @@ OperandFactory::OperandFactory(void)
 		[IOperand::EOperandType::INT32] = &OperandFactory::createInt32,
 		[IOperand::EOperandType::FLOAT] = &OperandFactory::createFloat,
 		[IOperand::EOperandType::DOUBLE] = &OperandFactory::createDouble,
+	},
+	_opRegex("(\\w+)\\(([0-9]+(?:\\.[0-9]*)?)\\)"),
+	_opTypes{
+		{"int8", IOperand::INT8},
+		{"int16", IOperand::INT16},
+		{"int32", IOperand::INT32},
+		{"float", IOperand::FLOAT},
+		{"double", IOperand::DOUBLE},
 	}
 {
 }
@@ -30,10 +38,22 @@ OperandFactory::~OperandFactory(void)
 
 OperandFactory			OperandFactory::instance = {};
 
+IOperand const			*OperandFactory::parseOperand(std::string const &value) const
+{
+	std::smatch				match;
+
+	if (!std::regex_match(value, match, _opRegex))
+		throw std::runtime_error("Invalid value");
+	auto const				opType = _opTypes.find(match[1]);
+	if (opType == _opTypes.end())
+		throw std::runtime_error("Unknown operand");
+	return (createOperand(opType->second, match[2]));
+}
+
 IOperand const			*OperandFactory::createOperand(IOperand::EOperandType type, std::string const &value) const
 {
 	if (type < 0 || type >= IOperand::OPERAND_COUNT)
-		throw std::runtime_error("No such operand");
+		throw std::runtime_error("Invalid operand");
 	return ((this->*(_operandCreators[type]))(value));
 }
 
