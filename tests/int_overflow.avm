@@ -1,0 +1,23 @@
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+push int32(100)
+mul
+mul
+mul
+mul
+mul
+mul
+mul
+mul
+mul
+mul
+mul

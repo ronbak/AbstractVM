@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/28 14:33:31 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/28 18:10:57 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -46,7 +46,7 @@ std::unordered_map<std::string, std::pair<VMStack::instr_t, bool>> const	VMStack
 	{"pop", {&VMStack::_instr_pop, false}},
 	{"dump", {&VMStack::_instr_dump, false}},
 	{"assert", {&VMStack::_instr_assert, true}},
-	{"swap", {&VMStack::_instr_assert, false}},
+	{"swap", {&VMStack::_instr_swap, false}},
 	{"add", {&VMStack::_instr_add, false}},
 	{"sub", {&VMStack::_instr_sub, false}},
 	{"mul", {&VMStack::_instr_mul, false}},
@@ -98,7 +98,8 @@ void			VMStack::_instr_assert(std::string const *param)
 	std::unique_ptr<IOperand const> const	val(OperandFactory::instance.parseOperand(*param));
 
 	if (last->toString() != val->toString())
-		throw std::runtime_error("Assert fail");
+		throw std::runtime_error(std::string("Assert fail ")
+			+ last->toString() + " != " + val->toString());
 }
 
 void			VMStack::_instr_swap(std::string const *)
@@ -116,7 +117,7 @@ void			VMStack::_instr_##NAME(std::string const *)			\
 	std::unique_ptr<IOperand const> const	a(_extract_last());		\
 	std::unique_ptr<IOperand const> const	b(_extract_last());		\
 																	\
-	_stack.push_back(*a OP *b);										\
+	_stack.push_back(*b OP *a);										\
 }
 
 INSTR_DEF(add, +);

@@ -6,13 +6,14 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 18:12:02 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 23:55:26 by juloo            ###   ########.fr       //
+//   Updated: 2016/01/28 18:26:37 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "IOperand.hpp"
 #include "OperandFactory.hpp"
 #include "Operator.hpp"
+#include "from_string.hpp"
 
 #include <cfenv>
 #include <cmath>
@@ -29,12 +30,11 @@
 ** ========================================================================== **
 ** Integer operations
 */
-
 template<typename T>
 static T			integer_overflow(int64_t n)
 {
-	if (n < std::numeric_limits<T>::min()
-		|| n > std::numeric_limits<T>::max())
+	if (n < (int64_t)std::numeric_limits<T>::min()
+		|| n > (int64_t)std::numeric_limits<T>::max())
 		throw std::runtime_error("Overflow");
 	return ((T)n);
 }
@@ -42,19 +42,19 @@ static T			integer_overflow(int64_t n)
 template<typename T, TMPL_IF(std::is_integral<T>::value)>
 static T			op_add(T a, T b)
 {
-	return (integer_overflow<T>((int64_t)a) + ((int64_t)b));
+	return (integer_overflow<T>(((int64_t)a) + ((int64_t)b)));
 }
 
 template<typename T, TMPL_IF(std::is_integral<T>::value)>
 static T			op_sub(T a, T b)
 {
-	return (integer_overflow<T>((int64_t)a) - ((int64_t)b));
+	return (integer_overflow<T>(((int64_t)a) - ((int64_t)b)));
 }
 
 template<typename T, TMPL_IF(std::is_integral<T>::value)>
 static T			op_mul(T a, T b)
 {
-	return (integer_overflow<T>((int64_t)a) * ((int64_t)b));
+	return (integer_overflow<T>(((int64_t)a) * ((int64_t)b)));
 }
 
 template<typename T, TMPL_IF(std::is_integral<T>::value)>
@@ -139,26 +139,26 @@ static T			op_mod(T a, T b)
 ** call_op
 */
 
-#define DEF_OP(T, T_NAME, PARSE, OP_NAME, OP)		\
+#define DEF_OP(T, T_NAME, OP_NAME, OP)		\
 static IOperand const	*op_##T_NAME##OP_NAME(std::string const &a, std::string const &b)		\
 {																								\
-	T const		value = OP(((T)PARSE(a)), ((T)PARSE(b)));										\
+	T const		value = OP(from_string<T>(a), from_string<T>(b));										\
 																								\
 	return (OperandFactory::instance.createOperand(IOperand::T_NAME, std::to_string(value)));	\
 }
 
-#define DEF_OP_ALL(T, T_NAME, PARSE)	\
-	DEF_OP(T, T_NAME, PARSE, OP_ADD, op_add);	\
-	DEF_OP(T, T_NAME, PARSE, OP_SUB, op_sub);	\
-	DEF_OP(T, T_NAME, PARSE, OP_MUL, op_mul);	\
-	DEF_OP(T, T_NAME, PARSE, OP_DIV, op_div);	\
-	DEF_OP(T, T_NAME, PARSE, OP_MOD, op_mod);
+#define DEF_OP_ALL(T, T_NAME)	\
+	DEF_OP(T, T_NAME, OP_ADD, op_add<T>);	\
+	DEF_OP(T, T_NAME, OP_SUB, op_sub<T>);	\
+	DEF_OP(T, T_NAME, OP_MUL, op_mul<T>);	\
+	DEF_OP(T, T_NAME, OP_DIV, op_div<T>);	\
+	DEF_OP(T, T_NAME, OP_MOD, op_mod<T>);
 
-DEF_OP_ALL(int8_t, INT8, std::stoi);
-DEF_OP_ALL(int16_t, INT16, std::stoi);
-DEF_OP_ALL(int32_t, INT32, std::stol);
-DEF_OP_ALL(float, FLOAT, std::stof);
-DEF_OP_ALL(double, DOUBLE, std::stod);
+DEF_OP_ALL(int8_t, INT8);
+DEF_OP_ALL(int16_t, INT16);
+DEF_OP_ALL(int32_t, INT32);
+DEF_OP_ALL(float, FLOAT);
+DEF_OP_ALL(double, DOUBLE);
 
 #define OP_GET(PRECI, OP)	((PRECI) * IOperand::OPERAND_COUNT + (OP))
 #define OP_SET(T, OP)		[OP_GET(IOperand::T, OP)] = &op_##T##OP

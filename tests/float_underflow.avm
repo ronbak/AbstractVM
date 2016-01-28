@@ -1,0 +1,5 @@
+push float(1)
+push float(100)
+div
+assert float(0.01)
+print

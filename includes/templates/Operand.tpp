@@ -6,13 +6,15 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:43:13 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/27 22:46:45 by juloo            ###   ########.fr       //
+//   Updated: 2016/01/28 18:27:47 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
+#include "from_string.hpp"
+
 template<typename T>
 Operand<T>::Operand(std::string const &value)
-	: _strValue(value)
+	: _strValue(std::to_string(from_string<T>(value)))
 {
 }
 
