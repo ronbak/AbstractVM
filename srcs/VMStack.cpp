@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/29 00:43:22 by juloo            ###   ########.fr       //
+//   Updated: 2016/01/29 23:23:40 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -16,7 +16,7 @@
 #include <iostream>
 
 VMStack::VMStack(void)
-	: _stack(), _exited(false)
+	: _stack(), _exited(false), _nestedIf(0), _disabledIf(0)
 {
 }
 
@@ -34,28 +34,33 @@ void			VMStack::exec(std::string const &instr, std::string const *param)
 		throw std::runtime_error("Instruction after exit");
 	if (f == _instructions.end())
 		throw std::runtime_error("Unknown instruction");
-	if (f->second.second != static_cast<bool>(param != nullptr))
-		throw std::runtime_error(f->second.second
+	if (_disabledIf > 0 && !std::get<2>(f->second))
+		return ;
+	if (std::get<1>(f->second) != static_cast<bool>(param != nullptr))
+		throw std::runtime_error(std::get<1>(f->second)
 			? "Instruction require an argument"
 			: "Instruction does not take an argument");
-	(this->*(f->second.first))(param);
+	(this->*(std::get<0>(f->second)))(param);
 }
 
-std::unordered_map<std::string, std::pair<VMStack::instr_t, bool>> const	VMStack::_instructions{
-	{"input", {&VMStack::_instr_input, true}},
-	{"push", {&VMStack::_instr_push, true}},
-	{"pop", {&VMStack::_instr_pop, false}},
-	{"dump", {&VMStack::_instr_dump, false}},
-	{"assert", {&VMStack::_instr_assert, true}},
-	{"swap", {&VMStack::_instr_swap, false}},
-	{"dup", {&VMStack::_instr_dup, false}},
-	{"add", {&VMStack::_instr_add, false}},
-	{"sub", {&VMStack::_instr_sub, false}},
-	{"mul", {&VMStack::_instr_mul, false}},
-	{"div", {&VMStack::_instr_div, false}},
-	{"mod", {&VMStack::_instr_mod, false}},
-	{"print", {&VMStack::_instr_print, false}},
-	{"exit", {&VMStack::_instr_exit, false}},
+std::unordered_map<std::string, std::tuple<VMStack::instr_t, bool, bool>> const	VMStack::_instructions{
+	{"input",	std::make_tuple(&VMStack::_instr_input,		true,	false)},
+	{"push",	std::make_tuple(&VMStack::_instr_push,		true,	false)},
+	{"pop",		std::make_tuple(&VMStack::_instr_pop,		false,	false)},
+	{"dump",	std::make_tuple(&VMStack::_instr_dump,		false,	false)},
+	{"assert",	std::make_tuple(&VMStack::_instr_assert,	true,	false)},
+	{"swap",	std::make_tuple(&VMStack::_instr_swap,		false,	false)},
+	{"dup",		std::make_tuple(&VMStack::_instr_dup,		false,	false)},
+	{"add",		std::make_tuple(&VMStack::_instr_add,		false,	false)},
+	{"sub",		std::make_tuple(&VMStack::_instr_sub,		false,	false)},
+	{"mul",		std::make_tuple(&VMStack::_instr_mul,		false,	false)},
+	{"div",		std::make_tuple(&VMStack::_instr_div,		false,	false)},
+	{"mod",		std::make_tuple(&VMStack::_instr_mod,		false,	false)},
+	{"print",	std::make_tuple(&VMStack::_instr_print,		false,	false)},
+	{"exit",	std::make_tuple(&VMStack::_instr_exit,		false,	false)},
+	{"if==",	std::make_tuple(&VMStack::_instr_ifeq,		false,	true)},
+	{"else",	std::make_tuple(&VMStack::_instr_else,		false,	true)},
+	{"endif",	std::make_tuple(&VMStack::_instr_endif,		false,	true)},
 };
 
 IOperand const	*VMStack::_get_last(void)
@@ -169,4 +174,43 @@ void			VMStack::_instr_print(std::string const *)
 void			VMStack::_instr_exit(std::string const *)
 {
 	_exited = true;
+}
+
+void			VMStack::_instr_ifeq(std::string const *)
+{
+	std::unique_ptr<IOperand const>	a;
+	std::unique_ptr<IOperand const>	b;
+
+	if (_disabledIf > 0)
+		_disabledIf++;
+	else
+	{
+		_nestedIf++;
+		a.reset(_extract_last());
+		b.reset(_extract_last());
+		if (a->toString() != b->toString())
+			_disabledIf++;
+	}
+}
+
+void			VMStack::_instr_else(std::string const *)
+{
+	if (_disabledIf == 0)
+		_disabledIf++;
+	else if (_disabledIf == 1)
+		_disabledIf--;
+}
+
+void			VMStack::_instr_endif(std::string const *)
+{
+	if (_disabledIf > 0)
+	{
+		_disabledIf--;
+		if (_disabledIf == 0)
+		{
+			if (_nestedIf == 0)
+				throw std::runtime_error("Unbound endif");
+			_nestedIf--;
+		}
+	}
 }

@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:27:18 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/29 00:41:39 by juloo            ###   ########.fr       //
+//   Updated: 2016/01/29 23:25:04 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -54,6 +54,9 @@ protected:
 	std::vector<IOperand const*>	_stack;
 	bool							_exited;
 
+	uint32_t						_nestedIf;
+	uint32_t						_disabledIf;
+
 	IOperand const	*_get_last(void);
 	IOperand const	*_extract_last(void);
 
@@ -71,8 +74,11 @@ protected:
 	void			_instr_mod(std::string const *param);
 	void			_instr_print(std::string const *param);
 	void			_instr_exit(std::string const *param);
+	void			_instr_ifeq(std::string const *param);
+	void			_instr_else(std::string const *param);
+	void			_instr_endif(std::string const *param);
 
-	static std::unordered_map<std::string, std::pair<instr_t, bool>> const	_instructions;
+	static std::unordered_map<std::string, std::tuple<instr_t, bool, bool>> const	_instructions;
 
 private:
 	VMStack(VMStack &&src) = delete;

@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 15:06:10 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/28 17:51:02 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/29 16:59:02 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -21,7 +21,7 @@ OperandFactory::OperandFactory(void)
 		[IOperand::EOperandType::FLOAT] = &OperandFactory::createFloat,
 		[IOperand::EOperandType::DOUBLE] = &OperandFactory::createDouble,
 	},
-	_opRegex("(\\w+)\\(([0-9]+(?:\\.[0-9]*)?)\\)"),
+	_opRegex("(\\w+)\\((-?[0-9]+(?:\\.[0-9]*)?)\\)"),
 	_opTypes{
 		{"int8", IOperand::INT8},
 		{"int16", IOperand::INT16},
