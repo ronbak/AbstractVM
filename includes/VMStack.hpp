@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:27:18 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/28 18:51:05 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/29 00:41:39 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -63,6 +63,7 @@ protected:
 	void			_instr_dump(std::string const *param);
 	void			_instr_assert(std::string const *param);
 	void			_instr_swap(std::string const *param);
+	void			_instr_dup(std::string const *param);
 	void			_instr_add(std::string const *param);
 	void			_instr_sub(std::string const *param);
 	void			_instr_mul(std::string const *param);

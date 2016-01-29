@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/28 18:53:27 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/29 00:43:22 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -48,6 +48,7 @@ std::unordered_map<std::string, std::pair<VMStack::instr_t, bool>> const	VMStack
 	{"dump", {&VMStack::_instr_dump, false}},
 	{"assert", {&VMStack::_instr_assert, true}},
 	{"swap", {&VMStack::_instr_swap, false}},
+	{"dup", {&VMStack::_instr_dup, false}},
 	{"add", {&VMStack::_instr_add, false}},
 	{"sub", {&VMStack::_instr_sub, false}},
 	{"mul", {&VMStack::_instr_mul, false}},
@@ -135,6 +136,13 @@ void			VMStack::_instr_swap(std::string const *)
 
 	_stack.push_back(a);
 	_stack.push_back(b);
+}
+
+void			VMStack::_instr_dup(std::string const *)
+{
+	IOperand const *const	a = _get_last();
+
+	_stack.push_back(OperandFactory::instance.createOperand(a->getType(), a->toString()));
 }
 
 #define INSTR_DEF(NAME, OP)	\
