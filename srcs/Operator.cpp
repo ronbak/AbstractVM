@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 18:12:02 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/28 18:26:37 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/29 23:59:48 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -142,9 +142,22 @@ static T			op_mod(T a, T b)
 #define DEF_OP(T, T_NAME, OP_NAME, OP)		\
 static IOperand const	*op_##T_NAME##OP_NAME(std::string const &a, std::string const &b)		\
 {																								\
-	T const		value = OP(from_string<T>(a), from_string<T>(b));										\
+	T const		value = OP(from_string<T>(a), from_string<T>(b));								\
 																								\
 	return (OperandFactory::instance.createOperand(IOperand::T_NAME, std::to_string(value)));	\
+}
+#include <iostream>
+
+#define DEF_DIFF(T, T_NAME)	\
+static int				diff_##T_NAME(std::string const &a, std::string const &b)	\
+{																					\
+	T const		diff = from_string<T>(b) - from_string<T>(a);						\
+																					\
+	if (diff > std::numeric_limits<T>::epsilon())									\
+		return (1);																	\
+	if (diff < -std::numeric_limits<T>::epsilon())									\
+		return (-1);																\
+	return (0);																		\
 }
 
 #define DEF_OP_ALL(T, T_NAME)	\
@@ -152,7 +165,8 @@ static IOperand const	*op_##T_NAME##OP_NAME(std::string const &a, std::string co
 	DEF_OP(T, T_NAME, OP_SUB, op_sub<T>);	\
 	DEF_OP(T, T_NAME, OP_MUL, op_mul<T>);	\
 	DEF_OP(T, T_NAME, OP_DIV, op_div<T>);	\
-	DEF_OP(T, T_NAME, OP_MOD, op_mod<T>);
+	DEF_OP(T, T_NAME, OP_MOD, op_mod<T>);	\
+	DEF_DIFF(T, T_NAME);
 
 DEF_OP_ALL(int8_t, INT8);
 DEF_OP_ALL(int16_t, INT16);
@@ -162,6 +176,16 @@ DEF_OP_ALL(double, DOUBLE);
 
 #define OP_GET(PRECI, OP)	((PRECI) * IOperand::OPERAND_COUNT + (OP))
 #define OP_SET(T, OP)		[OP_GET(IOperand::T, OP)] = &op_##T##OP
+
+#define OP_GET_DIFF(T)		[IOperand::T] = &diff_##T
+
+int				(*Operator::diffs[IOperand::OPERAND_COUNT])(std::string const &a, std::string const &b) = {
+	OP_GET_DIFF(INT8),
+	OP_GET_DIFF(INT16),
+	OP_GET_DIFF(INT32),
+	OP_GET_DIFF(FLOAT),
+	OP_GET_DIFF(DOUBLE),
+};
 
 IOperand const	*(*Operator::operations[IOperand::OPERAND_COUNT*OP_COUNT])(std::string const &a, std::string const &b) = {
 	OP_SET(INT8, OP_ADD),
@@ -200,6 +224,18 @@ IOperand const	*Operator::call_op(IOperand const &a, IOperand const &b, EOperato
 	if (op < 0 || op >= OP_COUNT)
 		throw std::runtime_error("Invalid operation type");
 	auto f = operations[OP_GET(precision, op)];
+	if (f == NULL)
+		throw std::runtime_error("LOL");
+	return (f(a.toString(), b.toString()));
+}
+
+int				Operator::diff(IOperand const &a, IOperand const &b)
+{
+	int const		precision = std::max(a.getPrecision(), b.getPrecision());
+
+	if (precision < 0 || precision >= IOperand::OPERAND_COUNT)
+		throw std::runtime_error("Invalid operand type");
+	auto f = diffs[precision];
 	if (f == NULL)
 		throw std::runtime_error("LOL");
 	return (f(a.toString(), b.toString()));

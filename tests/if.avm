@@ -1,20 +1,12 @@
 input float(0)
 input float(0)
 if==
-	push int8(1)
-	input int8(1)
-	if==
+	push int8(0)
+else
+	if<
 		push int8(-1)
 	else
-		push int8(-2)
-	endif
-else
-	push int8(0)
-	input int8(0)
-	if==
-		push int8(-3)
-	else
-		push int8(-4)
+		push int8(1)
 	endif
 endif
-dump
+print

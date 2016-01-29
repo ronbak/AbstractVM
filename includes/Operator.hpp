@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/27 18:54:59 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/28 18:27:13 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/01/29 00:03:32 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -34,9 +34,11 @@ public:
 	virtual ~Operator(void);
 
 	static IOperand const	*call_op(IOperand const &a, IOperand const &b, EOperator op);
+	static int				diff(IOperand const &a, IOperand const &b);
 
 protected:
 
+	static int				(*diffs[])(std::string const &a, std::string const &b);
 	static IOperand const	*(*operations[])(std::string const &a, std::string const &b);
 
 private:

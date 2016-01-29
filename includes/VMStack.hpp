@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:27:18 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/29 23:25:04 by juloo            ###   ########.fr       //
+//   Updated: 2016/01/30 00:06:33 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -33,10 +33,17 @@
 **  mul			Multiplication, same behavior as add
 **  div			Division, same behavior as add
 **  mod			Modulo, same behavior as add
+**  if==		Compare the 2 top values
+**  if!=		Compare the 2 top values
+**  if<			Compare the 2 top values
+**  if>			Compare the 2 top values
+**  if<=		Compare the 2 top values
+**  if>=		Compare the 2 top values
+**  else		Else
+**  endif		Endif
 **  print		Print the top value
 **  exit		End
 ** TODO: rotate
-** TODO: if>, if<, if==, if>=, if<=, if!=, else, endif
 */
 
 class	VMStack
@@ -57,7 +64,7 @@ protected:
 	uint32_t						_nestedIf;
 	uint32_t						_disabledIf;
 
-	IOperand const	*_get_last(void);
+	IOperand const	*_get_last(uint32_t n = 0);
 	IOperand const	*_extract_last(void);
 
 	void			_instr_input(std::string const *param);
@@ -75,6 +82,11 @@ protected:
 	void			_instr_print(std::string const *param);
 	void			_instr_exit(std::string const *param);
 	void			_instr_ifeq(std::string const *param);
+	void			_instr_ifneq(std::string const *param);
+	void			_instr_iflt(std::string const *param);
+	void			_instr_ifgt(std::string const *param);
+	void			_instr_ifle(std::string const *param);
+	void			_instr_ifge(std::string const *param);
 	void			_instr_else(std::string const *param);
 	void			_instr_endif(std::string const *param);
 

@@ -6,11 +6,12 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/29 23:23:40 by juloo            ###   ########.fr       //
+//   Updated: 2016/01/30 00:02:45 by juloo            ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include "OperandFactory.hpp"
+#include "Operator.hpp"
 #include "VMStack.hpp"
 
 #include <iostream>
@@ -59,18 +60,20 @@ std::unordered_map<std::string, std::tuple<VMStack::instr_t, bool, bool>> const	
 	{"print",	std::make_tuple(&VMStack::_instr_print,		false,	false)},
 	{"exit",	std::make_tuple(&VMStack::_instr_exit,		false,	false)},
 	{"if==",	std::make_tuple(&VMStack::_instr_ifeq,		false,	true)},
+	{"if!=",	std::make_tuple(&VMStack::_instr_ifneq,		false,	true)},
+	{"if<",		std::make_tuple(&VMStack::_instr_iflt,		false,	true)},
+	{"if>",		std::make_tuple(&VMStack::_instr_ifgt,		false,	true)},
+	{"if<=",	std::make_tuple(&VMStack::_instr_ifle,		false,	true)},
+	{"if>=",	std::make_tuple(&VMStack::_instr_ifge,		false,	true)},
 	{"else",	std::make_tuple(&VMStack::_instr_else,		false,	true)},
 	{"endif",	std::make_tuple(&VMStack::_instr_endif,		false,	true)},
 };
 
-IOperand const	*VMStack::_get_last(void)
+IOperand const	*VMStack::_get_last(uint32_t n)
 {
-	IOperand const	*last;
-
-	if (_stack.size() == 0)
+	if (_stack.size() <= n)
 		throw std::runtime_error("Operation on an empty stack");
-	last = _stack.back();
-	return (last);
+	return (_stack[_stack.size() - n - 1]);
 }
 
 IOperand const	*VMStack::_extract_last(void)
@@ -176,22 +179,25 @@ void			VMStack::_instr_exit(std::string const *)
 	_exited = true;
 }
 
-void			VMStack::_instr_ifeq(std::string const *)
-{
-	std::unique_ptr<IOperand const>	a;
-	std::unique_ptr<IOperand const>	b;
-
-	if (_disabledIf > 0)
-		_disabledIf++;
-	else
-	{
-		_nestedIf++;
-		a.reset(_extract_last());
-		b.reset(_extract_last());
-		if (a->toString() != b->toString())
-			_disabledIf++;
-	}
+#define INSTR_IF_DEF(NAME, OP)		\
+void			VMStack::_instr_##NAME(std::string const *)			\
+{																	\
+	if (_disabledIf > 0)											\
+		_disabledIf++;												\
+	else															\
+	{																\
+		_nestedIf++;												\
+		if (!(Operator::diff(*_get_last(), *_get_last(1)) OP 0))	\
+			_disabledIf++;											\
+	}																\
 }
+
+INSTR_IF_DEF(ifeq, ==);
+INSTR_IF_DEF(ifneq, !=);
+INSTR_IF_DEF(iflt, <);
+INSTR_IF_DEF(ifgt, >);
+INSTR_IF_DEF(ifle, <=);
+INSTR_IF_DEF(ifge, >=);
 
 void			VMStack::_instr_else(std::string const *)
 {
