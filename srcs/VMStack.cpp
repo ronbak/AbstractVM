@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/01/30 00:02:45 by juloo            ###   ########.fr       //
+//   Updated: 2016/02/01 12:49:44 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -44,13 +44,20 @@ void			VMStack::exec(std::string const &instr, std::string const *param)
 	(this->*(std::get<0>(f->second)))(param);
 }
 
+bool			VMStack::isExited(void) const
+{
+	return (_exited);
+}
+
 std::unordered_map<std::string, std::tuple<VMStack::instr_t, bool, bool>> const	VMStack::_instructions{
 	{"input",	std::make_tuple(&VMStack::_instr_input,		true,	false)},
 	{"push",	std::make_tuple(&VMStack::_instr_push,		true,	false)},
 	{"pop",		std::make_tuple(&VMStack::_instr_pop,		false,	false)},
+	{"set",		std::make_tuple(&VMStack::_instr_set,		true,	false)},
 	{"dump",	std::make_tuple(&VMStack::_instr_dump,		false,	false)},
 	{"assert",	std::make_tuple(&VMStack::_instr_assert,	true,	false)},
 	{"swap",	std::make_tuple(&VMStack::_instr_swap,		false,	false)},
+	{"top",		std::make_tuple(&VMStack::_instr_top,		false,	false)},
 	{"dup",		std::make_tuple(&VMStack::_instr_dup,		false,	false)},
 	{"add",		std::make_tuple(&VMStack::_instr_add,		false,	false)},
 	{"sub",		std::make_tuple(&VMStack::_instr_sub,		false,	false)},
@@ -119,12 +126,18 @@ void			VMStack::_instr_pop(std::string const *)
 	delete _extract_last();
 }
 
+void			VMStack::_instr_set(std::string const *param)
+{
+	std::unique_ptr<IOperand const> const	top(_extract_last());
+
+	_stack.push_back(OperandFactory::instance.createOperand(top->getType(), *param));
+}
+
 void			VMStack::_instr_dump(std::string const *)
 {
-	std::cout << ">> DUMP" << std::endl;
+	std::cout << ">> DUMP (" << _stack.size() << ")" << std::endl;
 	for (auto it = _stack.rbegin(); it != _stack.rend(); ++it)
 		std::cout << (*it)->toString() << std::endl;
-	std::cout << ">> Dump size: " << _stack.size() << std::endl;
 }
 
 void			VMStack::_instr_assert(std::string const *param)
@@ -170,7 +183,17 @@ INSTR_DEF(mod, %);
 
 void			VMStack::_instr_print(std::string const *)
 {
+	IOperand const *const	top = _get_last();
+
+	if (top->getType() != IOperand::INT8)
+		throw std::runtime_error("Unprintable type");
 	std::cout << ">> PRINT" << std::endl
+		<< static_cast<char>(std::stoi(_get_last()->toString())) << std::endl;
+}
+
+void			VMStack::_instr_top(std::string const *)
+{
+	std::cout << ">> TOP" << std::endl
 		<< _get_last()->toString() << std::endl;
 }
 

@@ -1,12 +1,13 @@
 input float(0)
 input float(0)
 if==
-	push int8(0)
+	push int8(61)
 else
 	if<
-		push int8(-1)
+		push int8(60)
 	else
-		push int8(1)
+		push int8(62)
 	endif
 endif
 print
+exit
