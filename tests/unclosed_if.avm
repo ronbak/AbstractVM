@@ -1,0 +1,7 @@
+push int8(0)
+input int8(0)
+if==
+	exit
+else
+	dump
+	exit

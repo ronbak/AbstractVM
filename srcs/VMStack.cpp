@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/02/01 14:11:12 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/02/01 15:06:32 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -19,6 +19,7 @@
 
 VMStack::VMStack(void) :
 	_run_regex("\\s*(?:([^\\s;]+)(?:\\s+([^\\s;]+))?\\s*)?(?:;(;)?.*)?"),
+	_filename(),
 	_stack(),
 	_exited(false),
 	_nestedIf(0),
@@ -49,37 +50,43 @@ void			VMStack::run(std::string const &filename)
 void			VMStack::run(std::istream &in,
 					std::string const &filename, bool eot)
 {
+	auto const		old_file = _filename;
 	std::smatch		match;
 	std::string		line;
 	std::string		param;
 	uint32_t		line_count(0);
 
+	_filename = filename;
 	try
 	{
-		while (std::getline(in, line))
+		while (in)
 		{
+			std::getline(in, line);
 			line_count++;
 			if (!std::regex_match(line, match, _run_regex))
 				throw std::runtime_error("Syntax error");
 			if (match[1].length() > 0)
 			{
 				param = match[2].str();
-				exec(match[1], (param.size() > 0) ? &param : nullptr);
+				_exec(match[1], (param.size() > 0) ? &param : nullptr);
 			}
 			if ((eot && match[3].length() > 0) || _exited)
 				return ;
 		}
+		if (_nestedIf != 0 || _disabledIf != 0)
+			throw std::runtime_error("Unclosed if");
+		if (!_exited)
+			throw std::runtime_error("Missing exit instruction");
 	}
 	catch (std::runtime_error const &e)
 	{
 		throw std::runtime_error(filename + ":" + std::to_string(line_count)
 			+ ":\n" + e.what());
 	}
-	if (!_exited)
-		throw std::runtime_error("Missing exit instruction");
+	_filename = old_file;
 }
 
-void			VMStack::exec(std::string const &instr, std::string const *param)
+void			VMStack::_exec(std::string const &instr, std::string const *param)
 {
 	auto const		&f = _instructions.find(instr);
 
@@ -96,16 +103,12 @@ void			VMStack::exec(std::string const &instr, std::string const *param)
 	(this->*(std::get<0>(f->second)))(param);
 }
 
-bool			VMStack::isExited(void) const
-{
-	return (_exited);
-}
-
 std::unordered_map<std::string, std::tuple<VMStack::instr_t, bool, bool>> const	VMStack::_instructions{
 	{"input",	std::make_tuple(&VMStack::_instr_input,		true,	false)},
 	{"push",	std::make_tuple(&VMStack::_instr_push,		true,	false)},
 	{"pop",		std::make_tuple(&VMStack::_instr_pop,		false,	false)},
 	{"set",		std::make_tuple(&VMStack::_instr_set,		true,	false)},
+	{"call",	std::make_tuple(&VMStack::_instr_call,		true,	false)},
 	{"dump",	std::make_tuple(&VMStack::_instr_dump,		false,	false)},
 	{"assert",	std::make_tuple(&VMStack::_instr_assert,	true,	false)},
 	{"swap",	std::make_tuple(&VMStack::_instr_swap,		false,	false)},
@@ -192,6 +195,20 @@ void			VMStack::_instr_dump(std::string const *)
 		std::cout << (*it)->toString() << std::endl;
 }
 
+void			VMStack::_instr_call(std::string const *param)
+{
+	uint32_t const	s_nestedIf = _nestedIf;
+	uint32_t const	s_disabledIf = _disabledIf;
+
+	std::cout << ">> CALL " << *param << std::endl;
+	_nestedIf = 0;
+	_disabledIf = 0;
+	run(*param);
+	_nestedIf = s_nestedIf;
+	_disabledIf = s_disabledIf;
+	_exited = false;
+}
+
 void			VMStack::_instr_assert(std::string const *param)
 {
 	IOperand const *const					last = _get_last();
@@ -251,7 +268,10 @@ void			VMStack::_instr_top(std::string const *)
 
 void			VMStack::_instr_exit(std::string const *)
 {
+	std::cout << ">> EXIT " << _filename << std::endl;
 	_exited = true;
+	_nestedIf = 0;
+	_disabledIf = 0;
 }
 
 #define INSTR_IF_DEF(NAME, OP)		\
@@ -285,13 +305,11 @@ void			VMStack::_instr_else(std::string const *)
 void			VMStack::_instr_endif(std::string const *)
 {
 	if (_disabledIf > 0)
-	{
 		_disabledIf--;
-		if (_disabledIf == 0)
-		{
-			if (_nestedIf == 0)
-				throw std::runtime_error("Unbound endif");
-			_nestedIf--;
-		}
+	if (_disabledIf == 0)
+	{
+		if (_nestedIf == 0)
+			throw std::runtime_error("Unbound endif");
+		_nestedIf--;
 	}
 }

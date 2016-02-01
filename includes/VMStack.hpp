@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:27:18 by jaguillo          #+#    #+#             //
-//   Updated: 2016/02/01 14:01:44 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/02/01 15:06:44 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -61,21 +61,21 @@ public:
 	void			run(std::istream &in,
 						std::string const &filename, bool eot = false);
 
-	void			exec(std::string const &instr, std::string const *param = nullptr);
-
-	bool			isExited(void) const;
-
 protected:
 
 	typedef void		(VMStack::*instr_t)(std::string const *param);
 
 	std::regex						_run_regex;
 
-	std::vector<IOperand const*>	_stack;
-	bool							_exited;
+	std::string						_filename;
 
+	std::vector<IOperand const*>	_stack;
+
+	bool							_exited;
 	uint32_t						_nestedIf;
 	uint32_t						_disabledIf;
+
+	void			_exec(std::string const &instr, std::string const *param = nullptr);
 
 	IOperand const	*_get_last(uint32_t n = 0);
 	IOperand const	*_extract_last(void);
@@ -84,6 +84,7 @@ protected:
 	void			_instr_push(std::string const *param);
 	void			_instr_pop(std::string const *param);
 	void			_instr_set(std::string const *param);
+	void			_instr_call(std::string const *param);
 	void			_instr_dump(std::string const *param);
 	void			_instr_assert(std::string const *param);
 	void			_instr_swap(std::string const *param);
