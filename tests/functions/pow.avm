@@ -1,0 +1,28 @@
+; Return n^e
+;
+; 	TYPE		NAME		VALUE
+; params:
+; 	*			n			*
+; 	*			tmp			1
+; 	int*		e			*
+; return:
+; 	*			n^e
+;
+
+push int8(1)			; 1, e, tmp, n
+if>=
+	sub					; e-1, tmp, n
+	swap 2				; n, tmp, e-1
+	dup 2				; n, tmp, n, tmp, e-1
+	mul					; tmp*n, n, tmp, e-1
+	swap 2				; tmp, n, tmp*n, e-1
+	pop					; n, tmp*2, e-1
+	swap 2				; e-1, tmp*2, n
+	call pow.avm
+else
+	pop
+	pop					; tmp, n
+	swap 1				; n, tmp
+	pop					; tmp
+endif
+exit

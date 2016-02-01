@@ -1,0 +1,22 @@
+; Print n times a char
+;
+; 	TYPE		NAME		VALUE
+; params:
+; 	int*		n			*
+; 	int8		char		*
+; return:
+;
+
+push int32(1)
+if>=
+	sub
+	swap 1
+	print
+	swap 1
+	call print_n.avm
+else
+	pop
+	pop
+	pop
+endif
+exit

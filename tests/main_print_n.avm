@@ -1,0 +1,7 @@
+; char
+input int8(46)
+; n
+input int32(0)
+call functions/print_n.avm
+dump
+exit

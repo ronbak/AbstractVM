@@ -1,0 +1,28 @@
+; Find the nth fibonacci number
+;
+; 	TYPE		NAME		VALUE
+; params:
+; 	*			value		0
+; 	*			tmp			1
+; 	int*		n			>= 0
+; return:
+; 	*			value
+;
+
+push int32(0)			; 0, n, tmp, value
+if<=
+	pop
+	pop
+	pop					; value
+else
+	pop					; n, tmp, value
+	swap 1				; tmp, n, value
+	dup 1				; tmp, tmp, n, value
+	swap 3				; value, tmp, n, tmp
+	add					; value+tmp, n, tmp
+	swap 1				; n, value+tmp, tmp
+	push int32(1)		; 1, n, value+tmp, tmp
+	sub					; n-1, value+tmp, tmp
+	call fibonacci.avm
+endif
+exit

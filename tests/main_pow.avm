@@ -1,0 +1,6 @@
+input double(0)
+push double(1)
+input int32(1)
+call functions/pow.avm
+dump
+exit

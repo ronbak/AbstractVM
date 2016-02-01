@@ -1,0 +1,39 @@
+; Tak
+;
+; 	TYPE		NAME		VALUE
+; params:
+; 	*			x			*
+; 	*			y			*
+; 	*			z			*
+; return:
+; 	*			t
+;
+
+						; z, y, x
+swap 2					; x, y, z
+if<
+	dup 3				; x, y, z,		x, y, z
+	push int8(1)
+	sub					; x-1, y, z,	x, y, z
+	swap 2				; z, y, x-1,	x, y, z
+	call tak.avm		; x'			x, y, z
+	swap 3				; x, y, z,		x'
+	dup 3				; x, y, z,		x, y, z, x'
+	swap 1				; y, x, z,		x, y, z, x'
+	push int8(1)
+	sub					; y-1, x, z,	x, y, z, x'
+	swap 2				; z, x, y-1,	x, y, z, x'
+	swap 1				; x, z, y-1,	x, y, z, x'
+	call tak.avm		; y', x, y, z,	x'
+	swap 3				; z, x, y,		y', x'
+	push int8(1)
+	sub					; z-1, x, y,	y', x'
+	swap 2				; y, x, z-1,	y', x'
+	call tak.avm		; z', y', x'
+	call tak.avm		; t
+else
+	swap 1				; y, x, z
+	pop
+	pop					; t=z
+endif
+exit

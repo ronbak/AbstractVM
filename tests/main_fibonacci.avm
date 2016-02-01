@@ -1,0 +1,6 @@
+push double(0)
+push double(1)
+input double(0)
+call functions/fibonacci.avm
+top
+exit
