@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:27:18 by jaguillo          #+#    #+#             //
-//   Updated: 2016/02/01 15:06:44 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/02/01 17:55:19 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -29,8 +29,8 @@
 **  set			Change the top value (use the same type)
 **  dump		Dump all the stack
 **  assert		Compare the top value (Take an argument)
-**  swap		Swap the 2 top values
-**  dup			Dupplicate the top value
+**  swap		Swap the top value with the nth value (Take an argument)
+**  dup			Dupplicate the n top values
 **  top			Print the top value
 **  add			Add the 2 top values, consume them and push the result
 **  sub			Substraction, same behavior as add

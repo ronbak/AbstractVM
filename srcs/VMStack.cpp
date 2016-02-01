@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/02/01 15:06:32 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/02/01 17:55:06 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -71,7 +71,7 @@ void			VMStack::run(std::istream &in,
 				_exec(match[1], (param.size() > 0) ? &param : nullptr);
 			}
 			if ((eot && match[3].length() > 0) || _exited)
-				return ;
+				break ;
 		}
 		if (_nestedIf != 0 || _disabledIf != 0)
 			throw std::runtime_error("Unclosed if");
@@ -111,9 +111,9 @@ std::unordered_map<std::string, std::tuple<VMStack::instr_t, bool, bool>> const	
 	{"call",	std::make_tuple(&VMStack::_instr_call,		true,	false)},
 	{"dump",	std::make_tuple(&VMStack::_instr_dump,		false,	false)},
 	{"assert",	std::make_tuple(&VMStack::_instr_assert,	true,	false)},
-	{"swap",	std::make_tuple(&VMStack::_instr_swap,		false,	false)},
+	{"swap",	std::make_tuple(&VMStack::_instr_swap,		true,	false)},
 	{"top",		std::make_tuple(&VMStack::_instr_top,		false,	false)},
-	{"dup",		std::make_tuple(&VMStack::_instr_dup,		false,	false)},
+	{"dup",		std::make_tuple(&VMStack::_instr_dup,		true,	false)},
 	{"add",		std::make_tuple(&VMStack::_instr_add,		false,	false)},
 	{"sub",		std::make_tuple(&VMStack::_instr_sub,		false,	false)},
 	{"mul",		std::make_tuple(&VMStack::_instr_mul,		false,	false)},
@@ -199,11 +199,18 @@ void			VMStack::_instr_call(std::string const *param)
 {
 	uint32_t const	s_nestedIf = _nestedIf;
 	uint32_t const	s_disabledIf = _disabledIf;
+	std::string		fname;
+	std::size_t		pos;
 
-	std::cout << ">> CALL " << *param << std::endl;
-	_nestedIf = 0;
+	pos = _filename.rfind('/');
+	if (pos == std::string::npos)
+		fname = *param;
+	else
+		fname = std::string(_filename, 0, pos + 1) + *param;
+	std::cout << ">> CALL " << fname << std::endl;
+	_nestedIf = 0; // TODO: VMState
 	_disabledIf = 0;
-	run(*param);
+	run(fname);
 	_nestedIf = s_nestedIf;
 	_disabledIf = s_disabledIf;
 	_exited = false;
@@ -219,20 +226,30 @@ void			VMStack::_instr_assert(std::string const *param)
 			+ last->toString() + " != " + val->toString());
 }
 
-void			VMStack::_instr_swap(std::string const *)
+void			VMStack::_instr_swap(std::string const *param)
 {
-	IOperand const *const	a = _extract_last();
-	IOperand const *const	b = _extract_last();
+	uint32_t const			n = std::stoul(*param);
+	IOperand const *const	a = _get_last();
+	IOperand const *const	b = _get_last(n);
 
-	_stack.push_back(a);
-	_stack.push_back(b);
+	_stack[_stack.size() - n - 1] = a;
+	_stack[_stack.size() - 1    ] = b;
 }
 
-void			VMStack::_instr_dup(std::string const *)
+void			VMStack::_instr_dup(std::string const *param)
 {
-	IOperand const *const	a = _get_last();
+	uint32_t const			n = std::stoul(*param);
+	IOperand const			*op;
+	uint32_t				i;
+	uint32_t				end;
 
-	_stack.push_back(OperandFactory::instance.createOperand(a->getType(), a->toString()));
+	end = _stack.size();
+	i = end - n;
+	for (; i < end; i++)
+	{
+		op = _stack[i];
+		_stack.push_back(OperandFactory::instance.createOperand(op->getType(), op->toString()));
+	}
 }
 
 #define INSTR_DEF(NAME, OP)	\
