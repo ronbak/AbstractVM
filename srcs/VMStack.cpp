@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/02/01 12:49:44 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/02/01 14:11:12 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,10 +14,15 @@
 #include "Operator.hpp"
 #include "VMStack.hpp"
 
+#include <fstream>
 #include <iostream>
 
-VMStack::VMStack(void)
-	: _stack(), _exited(false), _nestedIf(0), _disabledIf(0)
+VMStack::VMStack(void) :
+	_run_regex("\\s*(?:([^\\s;]+)(?:\\s+([^\\s;]+))?\\s*)?(?:;(;)?.*)?"),
+	_stack(),
+	_exited(false),
+	_nestedIf(0),
+	_disabledIf(0)
 {
 }
 
@@ -25,6 +30,53 @@ VMStack::~VMStack(void)
 {
 	for (IOperand const *op : _stack)
 		delete op;
+}
+
+void			VMStack::run(void)
+{
+	run(std::cin, "<stdin>", true);
+}
+
+void			VMStack::run(std::string const &filename)
+{
+	std::ifstream	ifs(filename);
+
+	if (!ifs)
+		throw std::runtime_error(std::string(filename) + ": Cannot open");
+	run(ifs, filename);
+}
+
+void			VMStack::run(std::istream &in,
+					std::string const &filename, bool eot)
+{
+	std::smatch		match;
+	std::string		line;
+	std::string		param;
+	uint32_t		line_count(0);
+
+	try
+	{
+		while (std::getline(in, line))
+		{
+			line_count++;
+			if (!std::regex_match(line, match, _run_regex))
+				throw std::runtime_error("Syntax error");
+			if (match[1].length() > 0)
+			{
+				param = match[2].str();
+				exec(match[1], (param.size() > 0) ? &param : nullptr);
+			}
+			if ((eot && match[3].length() > 0) || _exited)
+				return ;
+		}
+	}
+	catch (std::runtime_error const &e)
+	{
+		throw std::runtime_error(filename + ":" + std::to_string(line_count)
+			+ ":\n" + e.what());
+	}
+	if (!_exited)
+		throw std::runtime_error("Missing exit instruction");
 }
 
 void			VMStack::exec(std::string const &instr, std::string const *param)

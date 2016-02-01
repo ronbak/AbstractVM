@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:27:18 by jaguillo          #+#    #+#             //
-//   Updated: 2016/02/01 12:43:19 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/02/01 14:01:44 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,6 +14,7 @@
 # define VMSTACK_HPP
 
 # include <IOperand.hpp>
+# include <istream>
 # include <unordered_map>
 # include <utility>
 # include <vector>
@@ -55,6 +56,11 @@ public:
 	VMStack(void);
 	virtual ~VMStack(void);
 
+	void			run(void);
+	void			run(std::string const &filename);
+	void			run(std::istream &in,
+						std::string const &filename, bool eot = false);
+
 	void			exec(std::string const &instr, std::string const *param = nullptr);
 
 	bool			isExited(void) const;
@@ -62,6 +68,8 @@ public:
 protected:
 
 	typedef void		(VMStack::*instr_t)(std::string const *param);
+
+	std::regex						_run_regex;
 
 	std::vector<IOperand const*>	_stack;
 	bool							_exited;
