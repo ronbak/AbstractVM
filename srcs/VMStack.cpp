@@ -6,7 +6,7 @@
 //   By: jaguillo <jaguillo@student.42.fr>          +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2016/01/28 12:37:47 by jaguillo          #+#    #+#             //
-//   Updated: 2016/02/01 17:55:06 by jaguillo         ###   ########.fr       //
+//   Updated: 2016/02/01 18:39:05 by jaguillo         ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -134,7 +134,7 @@ std::unordered_map<std::string, std::tuple<VMStack::instr_t, bool, bool>> const	
 IOperand const	*VMStack::_get_last(uint32_t n)
 {
 	if (_stack.size() <= n)
-		throw std::runtime_error("Operation on an empty stack");
+		throw std::runtime_error("Stack too small");
 	return (_stack[_stack.size() - n - 1]);
 }
 
