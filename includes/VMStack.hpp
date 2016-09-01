@@ -33,7 +33,7 @@
 **  dup			Dupplicate the n top values
 **  top			Print the top value
 **  add			Add the 2 top values, consume them and push the result
-**  sub			Substraction, same behavior as add
+**  sub			Subtraction, same behavior as add
 **  mul			Multiplication, same behavior as add
 **  div			Division, same behavior as add
 **  mod			Modulo, same behavior as add
